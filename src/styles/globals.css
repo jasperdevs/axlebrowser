@@ -1,13 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ============================================
    AXLE BROWSER THEME SYSTEM
-   Monochrome base + tint via CSS custom properties
    ============================================ */
 
 @custom-variant dark (&:is(.dark *));
 
-/* Theme tokens exposed to Tailwind */
 @theme inline {
   --color-bg-base: var(--bg-base);
   --color-bg-surface: var(--bg-surface);
@@ -22,50 +20,45 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-fg: var(--accent-fg);
   --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
 }
 
-/* ============================================
-   DARK MODE (default)
-   Pure monochrome -- no tint
-   ============================================ */
+/* Dark mode (default) -- zinc-based for a modern feel */
 :root {
-  --bg-base: #0a0a0a;
-  --bg-surface: #111111;
-  --bg-elevated: #1a1a1a;
-  --bg-hover: #222222;
-  --bg-active: #2a2a2a;
-  --border-default: #1e1e1e;
-  --fg-primary: #e4e4e4;
-  --fg-secondary: #888888;
-  --fg-muted: #555555;
-  --accent: #ffffff;
-  --accent-hover: #e0e0e0;
-  --accent-fg: #000000;
+  --bg-base: #09090b;
+  --bg-surface: #0f0f12;
+  --bg-elevated: #18181b;
+  --bg-hover: #1f1f23;
+  --bg-active: #27272a;
+  --border-default: #1a1a1e;
+  --fg-primary: #fafafa;
+  --fg-secondary: #a1a1aa;
+  --fg-muted: #52525b;
+  --accent: #e4e4e7;
+  --accent-hover: #d4d4d8;
+  --accent-fg: #09090b;
 }
 
-/* ============================================
-   LIGHT MODE
-   ============================================ */
+/* Light mode */
 .light {
-  --bg-base: #f5f5f5;
-  --bg-surface: #eeeeee;
+  --bg-base: #fafafa;
+  --bg-surface: #f4f4f5;
   --bg-elevated: #ffffff;
-  --bg-hover: #e8e8e8;
-  --bg-active: #dddddd;
-  --border-default: #e0e0e0;
-  --fg-primary: #1a1a1a;
-  --fg-secondary: #666666;
-  --fg-muted: #999999;
-  --accent: #000000;
-  --accent-hover: #222222;
-  --accent-fg: #ffffff;
+  --bg-hover: #e4e4e7;
+  --bg-active: #d4d4d8;
+  --border-default: #e4e4e7;
+  --fg-primary: #09090b;
+  --fg-secondary: #52525b;
+  --fg-muted: #a1a1aa;
+  --accent: #18181b;
+  --accent-hover: #27272a;
+  --accent-fg: #fafafa;
 }
 
 /* ============================================
-   BASE STYLES
+   BASE
    ============================================ */
 * {
   margin: 0;
@@ -79,43 +72,39 @@ body,
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--bg-base);
+  background: transparent;
   color: var(--fg-primary);
   font-family:
-    "Inter",
+    'Segoe UI',
     -apple-system,
     BlinkMacSystemFont,
-    "Segoe UI",
+    system-ui,
     sans-serif;
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   user-select: none;
 }
 
-/* Scrollbar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--bg-active);
   border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--fg-muted);
 }
 
-/* Make the title bar draggable */
+/* Title bar drag */
 .drag-region {
   -webkit-app-region: drag;
 }
-
 .no-drag {
   -webkit-app-region: no-drag;
 }

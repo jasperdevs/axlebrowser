@@ -6,11 +6,8 @@ export function Sidebar(): JSX.Element {
   const collapsed = useUIStore((s) => s.sidebarCollapsed)
 
   return (
-    <div className="flex h-full bg-bg-surface">
-      {/* Icon rail -- always visible */}
+    <div className="pointer-events-auto flex h-full shrink-0 bg-bg-base">
       <IconRail />
-
-      {/* Tab panel -- hidden when collapsed */}
       {!collapsed && <TabPanel />}
     </div>
   )

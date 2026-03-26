@@ -9,70 +9,66 @@ interface TabItemProps {
 export function TabItem({ tab }: TabItemProps): JSX.Element {
   const activeTabId = useTabStore((s) => s.activeTabId)
   const isActive = tab.id === activeTabId
-  const [isHovered, setIsHovered] = useState(false)
+  const [hovered, setHovered] = useState(false)
 
-  // Fade old tabs
-  const age = Date.now() - tab.lastAccessedAt
-  const mins = age / 60000
-  let opacity = ''
-  if (!isActive && mins > 60) opacity = 'opacity-35'
-  else if (!isActive && mins > 30) opacity = 'opacity-55'
-  else if (!isActive && mins > 10) opacity = 'opacity-75'
+  // Subtle fade for old tabs
+  const mins = (Date.now() - tab.lastAccessedAt) / 60000
+  let fade = ''
+  if (!isActive && mins > 60) fade = 'opacity-40'
+  else if (!isActive && mins > 30) fade = 'opacity-60'
 
   return (
     <div
-      className="group relative no-drag"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="no-drag relative"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <button
         onClick={() => window.axle.switchTab(tab.id)}
-        className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-[5px] text-left transition-all duration-150 ${opacity} ${
+        className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-[7px] text-left transition-all ${fade} ${
           isActive
-            ? 'bg-bg-active/80 text-fg-primary'
-            : 'text-fg-secondary hover:bg-bg-hover/60 hover:text-fg-primary'
+            ? 'bg-bg-active text-fg-primary'
+            : 'text-fg-secondary hover:bg-bg-hover hover:text-fg-primary'
         }`}
       >
         {/* Favicon */}
-        <div className="flex h-[14px] w-[14px] shrink-0 items-center justify-center">
+        <div className="flex h-4 w-4 shrink-0 items-center justify-center">
           {tab.faviconUrl ? (
             <img
               src={tab.faviconUrl}
               alt=""
-              className="h-[14px] w-[14px] rounded-[3px]"
+              className="h-4 w-4 rounded"
               onError={(e) => {
                 ;(e.target as HTMLImageElement).style.display = 'none'
               }}
             />
           ) : (
             <div
-              className={`h-2 w-2 rounded-full ${isActive ? 'bg-accent/60' : 'bg-fg-muted/25'}`}
+              className={`h-2.5 w-2.5 rounded-full ${isActive ? 'bg-accent/50' : 'bg-fg-muted/20'}`}
             />
           )}
         </div>
 
         {/* Title */}
-        <span className="flex-1 truncate text-[11.5px] leading-tight">
-          {tab.title || 'New Tab'}
-        </span>
+        <span className="flex-1 truncate text-[13px]">{tab.title || 'New Tab'}</span>
 
-        {/* Loading pulse */}
+        {/* Loading indicator */}
         {tab.isLoading && (
-          <div className="ml-auto h-1 w-1 shrink-0 animate-pulse rounded-full bg-accent" />
+          <div className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent" />
         )}
 
-        {/* Close on hover */}
-        {isHovered && !tab.isLoading && (
+        {/* Close */}
+        {hovered && !tab.isLoading && (
           <button
             onClick={(e) => {
               e.stopPropagation()
               window.axle.closeTab(tab.id)
             }}
-            className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded text-fg-muted/40 hover:text-fg-primary hover:bg-bg-active transition-colors"
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-fg-muted hover:text-fg-primary hover:bg-bg-active transition-colors"
           >
             <svg
-              width="8"
-              height="8"
+              width="10"
+              height="10"
               viewBox="0 0 10 10"
               fill="none"
               stroke="currentColor"

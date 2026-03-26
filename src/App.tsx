@@ -3,6 +3,7 @@ import { Sidebar } from '@/components/sidebar/Sidebar'
 import { Omnibox } from '@/components/omnibox/Omnibox'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
 import { SettingsPanel } from '@/components/settings/SettingsPanel'
+import { WindowControls } from '@/components/sidebar/WindowControls'
 import { useUIStore } from '@/stores/uiStore'
 import { useTabStore } from '@/stores/tabStore'
 import { useEffect } from 'react'
@@ -14,77 +15,37 @@ export default function App(): JSX.Element {
   const commandPaletteOpen = useUIStore((s) => s.commandPaletteOpen)
   const settingsOpen = useUIStore((s) => s.settingsOpen)
   const setOmniboxOpen = useUIStore((s) => s.setOmniboxOpen)
-  const toggleSidebar = useUIStore((s) => s.toggleSidebar)
   const setCommandPaletteOpen = useUIStore((s) => s.setCommandPaletteOpen)
   const setSettingsOpen = useUIStore((s) => s.setSettingsOpen)
   const activeTabId = useTabStore((s) => s.activeTabId)
 
-  // Global keyboard shortcuts
+  // Escape to close overlays (renderer-level, backup for menu accelerators)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent): void {
-      // Ctrl+L or Ctrl+K -> Omnibox
-      if ((e.ctrlKey && e.key === 'l') || (e.ctrlKey && e.key === 'k')) {
-        e.preventDefault()
-        setOmniboxOpen(true)
-      }
-      // Ctrl+B -> Toggle sidebar
-      if (e.ctrlKey && e.key === 'b') {
-        e.preventDefault()
-        toggleSidebar()
-      }
-      // Ctrl+Shift+P -> Command palette
-      if (e.ctrlKey && e.shiftKey && e.key === 'P') {
-        e.preventDefault()
-        setCommandPaletteOpen(true)
-      }
-      // Ctrl+T -> New tab
-      if (e.ctrlKey && e.key === 't') {
-        e.preventDefault()
-        window.axle.createTab()
-      }
-      // Ctrl+W -> Close active tab
-      if (e.ctrlKey && e.key === 'w') {
-        e.preventDefault()
-        if (activeTabId) {
-          window.axle.closeTab(activeTabId)
-        }
-      }
-      // Ctrl+R -> Reload
-      if (e.ctrlKey && e.key === 'r') {
-        e.preventDefault()
-        if (activeTabId) {
-          window.axle.reload(activeTabId)
-        }
-      }
-      // Alt+Left -> Back
-      if (e.altKey && e.key === 'ArrowLeft') {
-        e.preventDefault()
-        if (activeTabId) {
-          window.axle.goBack(activeTabId)
-        }
-      }
-      // Alt+Right -> Forward
-      if (e.altKey && e.key === 'ArrowRight') {
-        e.preventDefault()
-        if (activeTabId) {
-          window.axle.goForward(activeTabId)
-        }
-      }
-      // Escape -> Close overlays
       if (e.key === 'Escape') {
         setOmniboxOpen(false)
         setCommandPaletteOpen(false)
         setSettingsOpen(false)
       }
     }
-
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [setOmniboxOpen, toggleSidebar, setCommandPaletteOpen, setSettingsOpen, activeTabId])
+  }, [setOmniboxOpen, setCommandPaletteOpen, setSettingsOpen])
 
   return (
-    <div className="flex h-full w-full bg-bg-base">
+    <div className="flex h-screen w-screen">
+      {/* Sidebar -- has pointer events, solid background */}
       <Sidebar />
+
+      {/* Content area overlay -- transparent, clicks pass through to Electron tab views */}
+      <div className="pointer-events-none relative flex-1">
+        {/* Window controls: top-right, needs pointer events */}
+        <div className="pointer-events-auto drag-region absolute right-0 top-0 z-10 flex items-center gap-2 px-3 py-2">
+          <WindowControls />
+        </div>
+      </div>
+
+      {/* Overlays -- full screen, above everything */}
       {omniboxOpen && <Omnibox />}
       {commandPaletteOpen && <CommandPalette />}
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}

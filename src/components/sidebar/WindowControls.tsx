@@ -4,7 +4,7 @@ interface WindowControlsProps {
   compact?: boolean
 }
 
-export function WindowControls({ compact }: WindowControlsProps): JSX.Element {
+export function WindowControls({ compact: _compact }: WindowControlsProps): JSX.Element {
   const [maximized, setMaximized] = useState(true)
 
   useEffect(() => {
@@ -13,80 +13,81 @@ export function WindowControls({ compact }: WindowControlsProps): JSX.Element {
 
   async function handleMaximize(): Promise<void> {
     await window.axle.maximizeWindow()
-    const isMax = await window.axle.isMaximized()
-    setMaximized(isMax)
+    setMaximized(await window.axle.isMaximized())
   }
 
-  const size = compact ? 'h-5 w-5' : 'h-[18px] w-[18px]'
-  const iconSize = compact ? 7 : 8
-
   return (
-    <div className={`flex items-center ${compact ? 'gap-0.5' : 'gap-1'} no-drag`}>
+    <div className="flex items-center gap-[6px] no-drag">
+      {/* Minimize */}
       <button
         onClick={() => window.axle.minimizeWindow()}
-        className={`flex ${size} items-center justify-center rounded-full text-fg-muted/40 hover:bg-fg-muted/15 hover:text-fg-muted transition-all`}
+        className="group flex h-[13px] w-[13px] items-center justify-center rounded-full bg-fg-muted/15 hover:bg-[#f5bf4f] transition-colors"
         title="Minimize"
       >
         <svg
-          width={iconSize}
-          height={iconSize}
-          viewBox="0 0 10 10"
+          width="7"
+          height="7"
+          viewBox="0 0 8 8"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"
+          className="opacity-0 group-hover:opacity-100 text-black transition-opacity"
         >
-          <line x1="2.5" y1="5" x2="7.5" y2="5" />
+          <line x1="1.5" y1="4" x2="6.5" y2="4" />
         </svg>
       </button>
 
+      {/* Maximize */}
       <button
         onClick={handleMaximize}
-        className={`flex ${size} items-center justify-center rounded-full text-fg-muted/40 hover:bg-fg-muted/15 hover:text-fg-muted transition-all`}
+        className="group flex h-[13px] w-[13px] items-center justify-center rounded-full bg-fg-muted/15 hover:bg-[#34c759] transition-colors"
         title={maximized ? 'Restore' : 'Maximize'}
       >
-        {maximized ? (
-          <svg
-            width={iconSize}
-            height={iconSize}
-            viewBox="0 0 10 10"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.2"
-          >
-            <rect x="1" y="3" width="6" height="6" rx="1" />
-            <path d="M3 3V2C3 1.45 3.45 1 4 1H8C8.55 1 9 1.45 9 2V6C9 6.55 8.55 7 8 7H7" />
-          </svg>
-        ) : (
-          <svg
-            width={iconSize}
-            height={iconSize}
-            viewBox="0 0 10 10"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.2"
-          >
-            <rect x="1" y="1" width="8" height="8" rx="1.5" />
-          </svg>
-        )}
+        <svg
+          width="7"
+          height="7"
+          viewBox="0 0 8 8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          className="opacity-0 group-hover:opacity-100 text-black transition-opacity"
+        >
+          {maximized ? (
+            <>
+              <line x1="1.5" y1="4" x2="4" y2="1.5" />
+              <line x1="4" y1="1.5" x2="6.5" y2="4" />
+              <line x1="1.5" y1="4" x2="4" y2="6.5" />
+              <line x1="4" y1="6.5" x2="6.5" y2="4" />
+            </>
+          ) : (
+            <>
+              <line x1="1" y1="5" x2="3.5" y2="7.5" />
+              <line x1="4.5" y1="0.5" x2="7" y2="3" />
+            </>
+          )}
+        </svg>
       </button>
 
+      {/* Close */}
       <button
         onClick={() => window.axle.closeWindow()}
-        className={`flex ${size} items-center justify-center rounded-full text-fg-muted/40 hover:bg-[#e81123]/80 hover:text-white transition-all`}
+        className="group flex h-[13px] w-[13px] items-center justify-center rounded-full bg-fg-muted/15 hover:bg-[#ff5f57] transition-colors"
         title="Close"
       >
         <svg
-          width={iconSize}
-          height={iconSize}
-          viewBox="0 0 10 10"
+          width="7"
+          height="7"
+          viewBox="0 0 8 8"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"
+          className="opacity-0 group-hover:opacity-100 text-black transition-opacity"
         >
-          <line x1="2.5" y1="2.5" x2="7.5" y2="7.5" />
-          <line x1="7.5" y1="2.5" x2="2.5" y2="7.5" />
+          <line x1="1.5" y1="1.5" x2="6.5" y2="6.5" />
+          <line x1="6.5" y1="1.5" x2="1.5" y2="6.5" />
         </svg>
       </button>
     </div>

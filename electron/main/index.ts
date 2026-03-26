@@ -15,19 +15,20 @@ function createWindow(): void {
     minWidth: 600,
     minHeight: 400,
     frame: false,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#09090b',
     titleBarStyle: 'hidden',
     titleBarOverlay: false,
     icon: join(__dirname, '../../resources/axleXonly.svg')
   })
 
-  // Chrome UI view (sidebar on RIGHT side)
+  // Chrome UI view -- covers FULL window so overlays (omnibox, settings, window controls) work
   chromeView = new WebContentsView({
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: true,
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      transparent: true
     }
   })
 
@@ -46,18 +47,13 @@ function createWindow(): void {
   // Register IPC handlers
   registerIpcHandlers(tabManager, mainWindow)
 
-  // Set up security
+  // Set up security + shortcuts
   setupSecurity()
-
-  // Set up global shortcuts via menu accelerators
   setupGlobalShortcuts()
 
-  // Layout the views
+  // Layout
   updateLayout()
-
-  mainWindow.on('resize', () => {
-    updateLayout()
-  })
+  mainWindow.on('resize', () => updateLayout())
 
   mainWindow.on('closed', () => {
     tabManager?.destroy()
@@ -66,40 +62,39 @@ function createWindow(): void {
     tabManager = null
   })
 
-  // Start maximized and show
+  // Start maximized
   mainWindow.maximize()
   mainWindow.show()
 
-  // Create the first tab
+  // First tab
   tabManager.createTab()
 }
 
 function updateLayout(): void {
   if (!mainWindow || !chromeView || !tabManager) return
 
-  const bounds = mainWindow.getBounds()
+  const [width, height] = mainWindow.getContentSize()
   const sidebarWidth = tabManager.getSidebarWidth()
 
-  // Sidebar on the LEFT side
-  chromeView.setBounds({
-    x: 0,
-    y: 0,
-    width: sidebarWidth,
-    height: bounds.height
-  })
+  // Tab content: left of sidebar, below a small top padding
+  tabManager.updateTabBounds(sidebarWidth, width - sidebarWidth, height)
 
-  // Tab content fills everything to the RIGHT of the sidebar
-  tabManager.updateTabBounds(sidebarWidth, bounds.width - sidebarWidth, bounds.height)
+  // Chrome view: FULL window, on top of tab content
+  // The React app uses pointer-events:none on the transparent content area
+  // so clicks pass through to tab views underneath
+  chromeView.setBounds({ x: 0, y: 0, width, height })
+
+  // Ensure chrome view is on top
+  mainWindow.contentView.removeChildView(chromeView)
+  mainWindow.contentView.addChildView(chromeView)
 }
 
-// Expose for external use
 export function requestLayoutUpdate(): void {
   updateLayout()
 }
 
 function setupGlobalShortcuts(): void {
   if (!tabManager || !chromeView) return
-
   const tm = tabManager
   const cv = chromeView
 
@@ -119,17 +114,13 @@ function setupGlobalShortcuts(): void {
     {
       label: 'Browser',
       submenu: [
-        {
-          label: 'New Tab',
-          accelerator: 'CmdOrCtrl+T',
-          click: () => tm.createTab()
-        },
+        { label: 'New Tab', accelerator: 'CmdOrCtrl+T', click: () => tm.createTab() },
         {
           label: 'Close Tab',
           accelerator: 'CmdOrCtrl+W',
           click: () => {
-            const activeId = tm.getActiveTabId()
-            if (activeId) tm.closeTab(activeId)
+            const id = tm.getActiveTabId()
+            if (id) tm.closeTab(id)
           }
         },
         {
@@ -142,24 +133,24 @@ function setupGlobalShortcuts(): void {
           label: 'Reload',
           accelerator: 'CmdOrCtrl+R',
           click: () => {
-            const activeId = tm.getActiveTabId()
-            if (activeId) tm.reload(activeId)
+            const id = tm.getActiveTabId()
+            if (id) tm.reload(id)
           }
         },
         {
           label: 'Back',
           accelerator: 'Alt+Left',
           click: () => {
-            const activeId = tm.getActiveTabId()
-            if (activeId) tm.goBack(activeId)
+            const id = tm.getActiveTabId()
+            if (id) tm.goBack(id)
           }
         },
         {
           label: 'Forward',
           accelerator: 'Alt+Right',
           click: () => {
-            const activeId = tm.getActiveTabId()
-            if (activeId) tm.goForward(activeId)
+            const id = tm.getActiveTabId()
+            if (id) tm.goForward(id)
           }
         },
         { type: 'separator' },
@@ -187,11 +178,7 @@ function setupGlobalShortcuts(): void {
         {
           label: 'Fullscreen',
           accelerator: 'F11',
-          click: () => {
-            if (mainWindow) {
-              mainWindow.setFullScreen(!mainWindow.isFullScreen())
-            }
-          }
+          click: () => mainWindow?.setFullScreen(!mainWindow.isFullScreen())
         }
       ]
     },
@@ -206,14 +193,11 @@ function setupGlobalShortcuts(): void {
       ]
     }
   ]
-
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 function setupSecurity(): void {
-  session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
-    callback(false)
-  })
+  session.defaultSession.setPermissionRequestHandler((_wc, _perm, cb) => cb(false))
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     if (details.url.startsWith('http://localhost:') || details.url.startsWith('file://')) {
@@ -221,12 +205,7 @@ function setupSecurity(): void {
         responseHeaders: {
           ...details.responseHeaders,
           'Content-Security-Policy': [
-            "default-src 'self'; " +
-              "script-src 'self' 'unsafe-inline'; " +
-              "style-src 'self' 'unsafe-inline'; " +
-              "img-src 'self' data: https:; " +
-              "connect-src 'self' ws://localhost:* http://localhost:*; " +
-              "font-src 'self' data:;"
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws://localhost:* http://localhost:*; font-src 'self' data:;"
           ]
         }
       })
@@ -236,10 +215,5 @@ function setupSecurity(): void {
   })
 }
 
-app.whenReady().then(() => {
-  createWindow()
-})
-
-app.on('window-all-closed', () => {
-  app.quit()
-})
+app.whenReady().then(createWindow)
+app.on('window-all-closed', () => app.quit())
