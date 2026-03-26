@@ -43,7 +43,7 @@ function createWindow(): void {
   tabManager = new TabManager(mainWindow, chromeView)
 
   // Register IPC handlers
-  registerIpcHandlers(tabManager)
+  registerIpcHandlers(tabManager, mainWindow)
 
   // Set up security
   setupSecurity()
@@ -62,8 +62,10 @@ function createWindow(): void {
     tabManager = null
   })
 
-  // BaseWindow doesn't have 'ready-to-show', show immediately after setup
+  // Start maximized and show
+  mainWindow.maximize()
   mainWindow.show()
+
   // Create the first tab
   tabManager.createTab('https://www.google.com')
 }

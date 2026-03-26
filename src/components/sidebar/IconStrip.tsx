@@ -1,18 +1,40 @@
-import { useTabStore } from "@/stores/tabStore";
-import { useUIStore } from "@/stores/uiStore";
-import { useState } from "react";
-import type { TabState } from "@shared/types/tabs";
+import { useTabStore } from '@/stores/tabStore'
+import { useUIStore } from '@/stores/uiStore'
+import { useState } from 'react'
+import type { TabState } from '@shared/types/tabs'
 
 export function IconStrip(): JSX.Element {
-  const pinnedTabs = useTabStore((s) => s.pinnedTabs);
-  const tabs = useTabStore((s) => s.tabs);
-  const activeTabId = useTabStore((s) => s.activeTabId);
-  const nav = useTabStore((s) => s.activeNavigation);
+  const pinnedTabs = useTabStore((s) => s.pinnedTabs)
+  const tabs = useTabStore((s) => s.tabs)
+  const activeTabId = useTabStore((s) => s.activeTabId)
+  const nav = useTabStore((s) => s.activeNavigation)
 
   return (
     <div className="flex h-full w-[48px] flex-col items-center bg-bg-surface border-r border-border-default">
+      {/* Drag region + close button */}
+      <div className="drag-region flex w-full flex-col items-center pt-1 pb-0.5">
+        <button
+          onClick={() => window.axle.closeWindow()}
+          className="no-drag flex h-5 w-5 items-center justify-center rounded-md text-fg-muted hover:bg-[#e81123] hover:text-white transition-colors"
+          title="Close"
+        >
+          <svg
+            width="8"
+            height="8"
+            viewBox="0 0 10 10"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          >
+            <line x1="2" y1="2" x2="8" y2="8" />
+            <line x1="8" y1="2" x2="2" y2="8" />
+          </svg>
+        </button>
+      </div>
+
       {/* Nav controls */}
-      <div className="flex flex-col items-center gap-0.5 pt-2 pb-1 no-drag">
+      <div className="flex flex-col items-center gap-0.5 pt-0.5 pb-1 no-drag">
         <StripNavButton
           onClick={() => activeTabId && window.axle.goBack(activeTabId)}
           disabled={!nav?.canGoBack}
@@ -122,13 +144,13 @@ export function IconStrip(): JSX.Element {
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 function StripTab({ tab }: { tab: TabState }): JSX.Element {
-  const activeTabId = useTabStore((s) => s.activeTabId);
-  const isActive = tab.id === activeTabId;
-  const [hovered, setHovered] = useState(false);
+  const activeTabId = useTabStore((s) => s.activeTabId)
+  const isActive = tab.id === activeTabId
+  const [hovered, setHovered] = useState(false)
 
   return (
     <div
@@ -139,7 +161,7 @@ function StripTab({ tab }: { tab: TabState }): JSX.Element {
       <button
         onClick={() => window.axle.switchTab(tab.id)}
         className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-          isActive ? "bg-bg-active" : "hover:bg-bg-hover"
+          isActive ? 'bg-bg-active' : 'hover:bg-bg-hover'
         }`}
         title={tab.title}
       >
@@ -147,9 +169,7 @@ function StripTab({ tab }: { tab: TabState }): JSX.Element {
           <img src={tab.faviconUrl} alt="" className="h-4 w-4 rounded-sm" />
         ) : (
           <div
-            className={`h-2.5 w-2.5 rounded-full ${
-              isActive ? "bg-accent" : "bg-fg-muted/40"
-            }`}
+            className={`h-2.5 w-2.5 rounded-full ${isActive ? 'bg-accent' : 'bg-fg-muted/40'}`}
           />
         )}
         {tab.isLoading && (
@@ -160,31 +180,27 @@ function StripTab({ tab }: { tab: TabState }): JSX.Element {
       {/* Tooltip + thumbnail on hover */}
       {hovered && (
         <div className="absolute left-full top-1/2 -translate-y-1/2 z-50 ml-2 min-w-[160px] max-w-[260px] overflow-hidden rounded-xl border border-border-default bg-bg-elevated shadow-xl">
-          {tab.thumbnailDataUrl && (
-            <img src={tab.thumbnailDataUrl} alt="" className="w-full" />
-          )}
+          {tab.thumbnailDataUrl && <img src={tab.thumbnailDataUrl} alt="" className="w-full" />}
           <div className="px-2.5 py-1.5 text-[11px] text-fg-primary truncate">
-            {tab.title || "New Tab"}
+            {tab.title || 'New Tab'}
           </div>
-          <div className="px-2.5 pb-1.5 text-[10px] text-fg-muted truncate">
-            {tab.url}
-          </div>
+          <div className="px-2.5 pb-1.5 text-[10px] text-fg-muted truncate">{tab.url}</div>
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function StripNavButton({
   children,
   disabled,
   onClick,
-  title,
+  title
 }: {
-  children: React.ReactNode;
-  disabled?: boolean;
-  onClick?: () => void;
-  title?: string;
+  children: React.ReactNode
+  disabled?: boolean
+  onClick?: () => void
+  title?: string
 }): JSX.Element {
   return (
     <button
@@ -193,11 +209,11 @@ function StripNavButton({
       title={title}
       className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors no-drag ${
         disabled
-          ? "text-fg-muted/30 cursor-default"
-          : "text-fg-secondary hover:bg-bg-hover hover:text-fg-primary cursor-default"
+          ? 'text-fg-muted/30 cursor-default'
+          : 'text-fg-secondary hover:bg-bg-hover hover:text-fg-primary cursor-default'
       }`}
     >
       {children}
     </button>
-  );
+  )
 }

@@ -1,21 +1,27 @@
-import { useUIStore } from "@/stores/uiStore";
-import { useTabStore } from "@/stores/tabStore";
-import { SidebarNav } from "./SidebarNav";
-import { DomainDisplay } from "./DomainDisplay";
-import { TabList } from "./TabList";
-import { PinnedSites } from "./PinnedSites";
-import { SidebarFooter } from "./SidebarFooter";
-import { IconStrip } from "./IconStrip";
+import { useUIStore } from '@/stores/uiStore'
+import { SidebarNav } from './SidebarNav'
+import { DomainDisplay } from './DomainDisplay'
+import { TabList } from './TabList'
+import { PinnedSites } from './PinnedSites'
+import { SidebarFooter } from './SidebarFooter'
+import { IconStrip } from './IconStrip'
+import { WindowControls } from './WindowControls'
 
 export function Sidebar(): JSX.Element {
-  const collapsed = useUIStore((s) => s.sidebarCollapsed);
+  const collapsed = useUIStore((s) => s.sidebarCollapsed)
 
   if (collapsed) {
-    return <IconStrip />;
+    return <IconStrip />
   }
 
   return (
     <div className="flex h-full w-[200px] flex-col bg-bg-surface border-r border-border-default">
+      {/* Title bar drag region + window controls */}
+      <div className="drag-region flex items-center justify-between px-2 pt-1.5 pb-0">
+        <div className="w-2" />
+        <WindowControls />
+      </div>
+
       {/* Domain display for current page */}
       <DomainDisplay />
 
@@ -37,7 +43,7 @@ export function Sidebar(): JSX.Element {
       {/* Footer */}
       <SidebarFooter />
     </div>
-  );
+  )
 }
 
 function NewTabButton(): JSX.Element {
@@ -59,5 +65,5 @@ function NewTabButton(): JSX.Element {
       </svg>
       New Tab
     </button>
-  );
+  )
 }
