@@ -4,10 +4,8 @@ import { join } from 'path'
 import type { TabState, NavigationState } from '@shared/types/tabs'
 import type { TabStateSnapshot } from '@shared/types/ipc'
 
-const ICON_RAIL_WIDTH = 52
-const TAB_PANEL_WIDTH = 240
-const DEFAULT_SIDEBAR_WIDTH = ICON_RAIL_WIDTH + TAB_PANEL_WIDTH // 292
-const COLLAPSED_SIDEBAR_WIDTH = ICON_RAIL_WIDTH // 52
+const DEFAULT_SIDEBAR_WIDTH = 250
+const COLLAPSED_SIDEBAR_WIDTH = 60 // Zen: calc(48px + 6px*2)
 
 interface ManagedTab {
   id: string

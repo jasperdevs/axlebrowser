@@ -2,29 +2,24 @@ import { create } from 'zustand'
 
 interface UIStore {
   sidebarCollapsed: boolean
-  omniboxOpen: boolean
-  commandPaletteOpen: boolean
-  settingsOpen: boolean
+  urlbarOpen: boolean
+  urlbarQuery: string
 
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
-  setOmniboxOpen: (open: boolean) => void
-  setCommandPaletteOpen: (open: boolean) => void
-  setSettingsOpen: (open: boolean) => void
+  openUrlbar: (prefill?: string) => void
+  closeUrlbar: () => void
+  setUrlbarQuery: (q: string) => void
 }
 
 export const useUIStore = create<UIStore>((set) => ({
   sidebarCollapsed: false,
-  omniboxOpen: false,
-  commandPaletteOpen: false,
-  settingsOpen: false,
+  urlbarOpen: false,
+  urlbarQuery: '',
 
-  toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
-  setOmniboxOpen: (open) =>
-    set({ omniboxOpen: open, commandPaletteOpen: false, settingsOpen: false }),
-  setCommandPaletteOpen: (open) =>
-    set({ commandPaletteOpen: open, omniboxOpen: false, settingsOpen: false }),
-  setSettingsOpen: (open) =>
-    set({ settingsOpen: open, omniboxOpen: false, commandPaletteOpen: false })
+  openUrlbar: (prefill) => set({ urlbarOpen: true, urlbarQuery: prefill || '' }),
+  closeUrlbar: () => set({ urlbarOpen: false, urlbarQuery: '' }),
+  setUrlbarQuery: (q) => set({ urlbarQuery: q })
 }))

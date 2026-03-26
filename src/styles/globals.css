@@ -1,60 +1,63 @@
 @import 'tailwindcss';
 
 /* ============================================
-   AXLE BROWSER THEME SYSTEM
+   AXLE BROWSER -- Zen-style theme
+   Exact replication of Zen Browser's dark theme
    ============================================ */
 
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --color-bg-base: var(--bg-base);
-  --color-bg-surface: var(--bg-surface);
-  --color-bg-elevated: var(--bg-elevated);
-  --color-bg-hover: var(--bg-hover);
-  --color-bg-active: var(--bg-active);
-  --color-border-default: var(--border-default);
-  --color-fg-primary: var(--fg-primary);
-  --color-fg-secondary: var(--fg-secondary);
-  --color-fg-muted: var(--fg-muted);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-fg: var(--accent-fg);
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-}
-
-/* Dark mode (default) -- zinc-based for a modern feel */
 :root {
-  --bg-base: #09090b;
-  --bg-surface: #0f0f12;
-  --bg-elevated: #18181b;
-  --bg-hover: #1f1f23;
-  --bg-active: #27272a;
-  --border-default: #1a1a1e;
-  --fg-primary: #fafafa;
-  --fg-secondary: #a1a1aa;
-  --fg-muted: #52525b;
-  --accent: #e4e4e7;
-  --accent-hover: #d4d4d8;
-  --accent-fg: #09090b;
-}
+  /* Core Zen dark colors */
+  --zen-bg: #1b1b1b;
+  --zen-sidebar-bg: #1b1b1b;
+  --zen-compact-bg: #131313;
+  --zen-panel-bg: #1f1f1f;
+  --zen-content-bg: #202020;
 
-/* Light mode */
-.light {
-  --bg-base: #fafafa;
-  --bg-surface: #f4f4f5;
-  --bg-elevated: #ffffff;
-  --bg-hover: #e4e4e7;
-  --bg-active: #d4d4d8;
-  --border-default: #e4e4e7;
-  --fg-primary: #09090b;
-  --fg-secondary: #52525b;
-  --fg-muted: #a1a1aa;
-  --accent: #18181b;
-  --accent-hover: #27272a;
-  --accent-fg: #fafafa;
+  /* Element colors */
+  --zen-element-bg: rgba(255, 255, 255, 0.15);
+  --zen-element-bg-hover: rgba(255, 255, 255, 0.1);
+  --zen-element-bg-active: rgba(255, 255, 255, 0.07);
+
+  /* Tab colors */
+  --zen-tab-selected: rgba(255, 255, 255, 0.18);
+  --zen-tab-hover: rgba(255, 255, 255, 0.08);
+  --zen-tab-shadow: 0 1px 1px 0px rgba(0, 0, 0, 0.05);
+  --zen-tab-scale: 0.98;
+
+  /* Text */
+  --zen-text: #ffffff;
+  --zen-text-secondary: rgba(255, 255, 255, 0.7);
+  --zen-text-muted: rgba(255, 255, 255, 0.4);
+
+  /* Borders */
+  --zen-border: rgba(255, 255, 255, 0.11);
+  --zen-separator: rgba(255, 255, 255, 0.1);
+
+  /* Radii (Windows) */
+  --zen-radius: 7px;
+  --zen-radius-tab: 4px;
+  --zen-radius-content: max(5px, calc(var(--zen-radius) - 2px));
+  --zen-radius-button: 6px;
+  --zen-radius-urlbar: 6px;
+
+  /* Sizing */
+  --zen-sidebar-padding: 6px;
+  --zen-separator-height: 22px;
+  --zen-tab-height: 36px;
+  --zen-tab-gap: 2px;
+  --zen-tab-padding-x: 8px;
+  --zen-tab-icon-gap: 8.5px;
+  --zen-essential-height: 44px;
+  --zen-toolbar-button-size: 16px;
+  --zen-toolbar-height: 36px;
+  --zen-urlbar-height: 48px;
+
+  /* Shadows */
+  --zen-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  --zen-urlbar-shadow: 0 30px 140px -15px rgba(0, 0, 0, 0.6);
+
+  /* Spacing */
+  --zen-element-separation: 4px;
 }
 
 /* ============================================
@@ -73,38 +76,38 @@ body,
   height: 100%;
   overflow: hidden;
   background: transparent;
-  color: var(--fg-primary);
-  font-family:
-    'Segoe UI',
-    -apple-system,
-    BlinkMacSystemFont,
-    system-ui,
-    sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+  color: var(--zen-text);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   user-select: none;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-active);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--fg-muted);
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Title bar drag */
+/* Drag regions */
 .drag-region {
   -webkit-app-region: drag;
 }
 .no-drag {
   -webkit-app-region: no-drag;
+}
+
+/* Press animation for tabs */
+.tab-pressable:active:hover {
+  transform: scale(var(--zen-tab-scale));
 }
