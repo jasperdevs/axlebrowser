@@ -1,8 +1,13 @@
+import { useUIStore } from '@/stores/uiStore'
+
 export function SidebarFooter(): JSX.Element {
+  const setSettingsOpen = useUIStore((s) => s.setSettingsOpen)
+
   return (
     <div className="flex items-center gap-1 border-t border-border-default px-2 py-1.5 no-drag">
       {/* Settings */}
       <button
+        onClick={() => setSettingsOpen(true)}
         className="flex h-7 w-7 items-center justify-center rounded-md text-fg-muted hover:bg-bg-hover hover:text-fg-secondary transition-colors"
         title="Settings"
       >
@@ -54,5 +59,5 @@ export function SidebarFooter(): JSX.Element {
         </svg>
       </button>
     </div>
-  );
+  )
 }

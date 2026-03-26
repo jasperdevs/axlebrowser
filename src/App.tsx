@@ -2,6 +2,7 @@ import { useIpcSubscriptions } from '@/hooks/useIpc'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 import { Omnibox } from '@/components/omnibox/Omnibox'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
+import { SettingsPanel } from '@/components/settings/SettingsPanel'
 import { useUIStore } from '@/stores/uiStore'
 import { useTabStore } from '@/stores/tabStore'
 import { useEffect } from 'react'
@@ -11,9 +12,11 @@ export default function App(): JSX.Element {
 
   const omniboxOpen = useUIStore((s) => s.omniboxOpen)
   const commandPaletteOpen = useUIStore((s) => s.commandPaletteOpen)
+  const settingsOpen = useUIStore((s) => s.settingsOpen)
   const setOmniboxOpen = useUIStore((s) => s.setOmniboxOpen)
   const toggleSidebar = useUIStore((s) => s.toggleSidebar)
   const setCommandPaletteOpen = useUIStore((s) => s.setCommandPaletteOpen)
+  const setSettingsOpen = useUIStore((s) => s.setSettingsOpen)
   const activeTabId = useTabStore((s) => s.activeTabId)
 
   // Global keyboard shortcuts
@@ -71,18 +74,20 @@ export default function App(): JSX.Element {
       if (e.key === 'Escape') {
         setOmniboxOpen(false)
         setCommandPaletteOpen(false)
+        setSettingsOpen(false)
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [setOmniboxOpen, toggleSidebar, setCommandPaletteOpen, activeTabId])
+  }, [setOmniboxOpen, toggleSidebar, setCommandPaletteOpen, setSettingsOpen, activeTabId])
 
   return (
     <div className="flex h-full w-full bg-bg-base">
       <Sidebar />
       {omniboxOpen && <Omnibox />}
       {commandPaletteOpen && <CommandPalette />}
+      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
     </div>
   )
 }
