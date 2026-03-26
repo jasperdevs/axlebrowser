@@ -4,8 +4,10 @@ import { join } from 'path'
 import type { TabState, NavigationState } from '@shared/types/tabs'
 import type { TabStateSnapshot } from '@shared/types/ipc'
 
-const DEFAULT_SIDEBAR_WIDTH = 200
-const COLLAPSED_SIDEBAR_WIDTH = 48
+const ICON_RAIL_WIDTH = 44
+const TAB_PANEL_WIDTH = 220
+const DEFAULT_SIDEBAR_WIDTH = ICON_RAIL_WIDTH + TAB_PANEL_WIDTH // 264
+const COLLAPSED_SIDEBAR_WIDTH = ICON_RAIL_WIDTH // 44
 
 interface ManagedTab {
   id: string
