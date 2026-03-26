@@ -1,19 +1,12 @@
-import {
-  app,
-  BaseWindow,
-  WebContentsView,
-  Menu,
-  ipcMain,
-  session,
-} from "electron";
-import { join } from "path";
-import { is } from "@electron-toolkit/utils";
-import { TabManager } from "./managers/TabManager";
-import { registerIpcHandlers } from "./ipc";
+import { app, BaseWindow, WebContentsView, Menu, ipcMain, session } from 'electron'
+import { join } from 'path'
+import { is } from '@electron-toolkit/utils'
+import { TabManager } from './managers/TabManager'
+import { registerIpcHandlers } from './ipc'
 
-let mainWindow: BaseWindow | null = null;
-let chromeView: WebContentsView | null = null;
-let tabManager: TabManager | null = null;
+let mainWindow: BaseWindow | null = null
+let chromeView: WebContentsView | null = null
+let tabManager: TabManager | null = null
 
 function createWindow(): void {
   mainWindow = new BaseWindow({
@@ -22,138 +15,131 @@ function createWindow(): void {
     minWidth: 600,
     minHeight: 400,
     frame: false,
-    show: false,
-    backgroundColor: "#0a0a0a",
-    titleBarStyle: "hidden",
-    titleBarOverlay: false,
-  });
+    backgroundColor: '#0a0a0a',
+    titleBarStyle: 'hidden',
+    titleBarOverlay: false
+  })
 
   // Chrome UI view (sidebar, omnibox, overlays)
   chromeView = new WebContentsView({
     webPreferences: {
-      preload: join(__dirname, "../preload/index.js"),
+      preload: join(__dirname, '../preload/index.js'),
       sandbox: true,
       contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
+      nodeIntegration: false
+    }
+  })
 
-  mainWindow.contentView.addChildView(chromeView);
+  mainWindow.contentView.addChildView(chromeView)
 
   // Load the chrome UI
-  if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
-    chromeView.webContents.loadURL(process.env["ELECTRON_RENDERER_URL"]);
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    chromeView.webContents.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    chromeView.webContents.loadFile(join(__dirname, "../renderer/index.html"));
+    chromeView.webContents.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
   // Initialize tab manager
-  tabManager = new TabManager(mainWindow, chromeView);
+  tabManager = new TabManager(mainWindow, chromeView)
 
   // Register IPC handlers
-  registerIpcHandlers(tabManager);
+  registerIpcHandlers(tabManager)
 
   // Set up security
-  setupSecurity();
+  setupSecurity()
 
   // Layout the views
-  updateLayout();
+  updateLayout()
 
-  mainWindow.on("resize", () => {
-    updateLayout();
-  });
+  mainWindow.on('resize', () => {
+    updateLayout()
+  })
 
-  mainWindow.on("closed", () => {
-    tabManager?.destroy();
-    mainWindow = null;
-    chromeView = null;
-    tabManager = null;
-  });
+  mainWindow.on('closed', () => {
+    tabManager?.destroy()
+    mainWindow = null
+    chromeView = null
+    tabManager = null
+  })
 
-  mainWindow.once("ready-to-show", () => {
-    mainWindow?.show();
-    // Create the first tab
-    tabManager?.createTab("https://www.google.com");
-  });
+  // BaseWindow doesn't have 'ready-to-show', show immediately after setup
+  mainWindow.show()
+  // Create the first tab
+  tabManager.createTab('https://www.google.com')
 }
 
 function updateLayout(): void {
-  if (!mainWindow || !chromeView || !tabManager) return;
+  if (!mainWindow || !chromeView || !tabManager) return
 
-  const bounds = mainWindow.getBounds();
-  const sidebarWidth = tabManager.getSidebarWidth();
+  const bounds = mainWindow.getBounds()
+  const sidebarWidth = tabManager.getSidebarWidth()
 
   // Chrome view covers the sidebar area
   chromeView.setBounds({
     x: 0,
     y: 0,
     width: sidebarWidth,
-    height: bounds.height,
-  });
+    height: bounds.height
+  })
 
   // Update tab view bounds
-  tabManager.updateTabBounds(sidebarWidth, bounds.width, bounds.height);
+  tabManager.updateTabBounds(sidebarWidth, bounds.width, bounds.height)
 }
 
 function setupSecurity(): void {
   // Set permission handler -- default deny
-  session.defaultSession.setPermissionRequestHandler(
-    (_webContents, _permission, callback) => {
-      callback(false);
-    },
-  );
+  session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false)
+  })
 
   // CSP for the chrome UI
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    if (
-      details.url.startsWith("http://localhost:") ||
-      details.url.startsWith("file://")
-    ) {
+    if (details.url.startsWith('http://localhost:') || details.url.startsWith('file://')) {
       callback({
         responseHeaders: {
           ...details.responseHeaders,
-          "Content-Security-Policy": [
+          'Content-Security-Policy': [
             "default-src 'self'; " +
               "script-src 'self' 'unsafe-inline'; " +
               "style-src 'self' 'unsafe-inline'; " +
               "img-src 'self' data: https:; " +
               "connect-src 'self' ws://localhost:* http://localhost:*; " +
-              "font-src 'self' data:;",
-          ],
-        },
-      });
+              "font-src 'self' data:;"
+          ]
+        }
+      })
     } else {
-      callback({ responseHeaders: details.responseHeaders });
+      callback({ responseHeaders: details.responseHeaders })
     }
-  });
+  })
 
   // Create hidden Edit menu for copy/paste on Windows
   const template: Electron.MenuItemConstructorOptions[] = [
     {
-      label: "Edit",
+      label: 'Edit',
       submenu: [
-        { role: "undo" },
-        { role: "redo" },
-        { type: "separator" },
-        { role: "cut" },
-        { role: "copy" },
-        { role: "paste" },
-        { role: "selectAll" },
-      ],
-    },
-  ];
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    }
+  ]
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 // Expose updateLayout so TabManager can call it
 export function requestLayoutUpdate(): void {
-  updateLayout();
+  updateLayout()
 }
 
 app.whenReady().then(() => {
-  createWindow();
-});
+  createWindow()
+})
 
-app.on("window-all-closed", () => {
-  app.quit();
-});
+app.on('window-all-closed', () => {
+  app.quit()
+})
