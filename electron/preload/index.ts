@@ -55,6 +55,15 @@ const api = {
     }
     ipcRenderer.on('tab:thumbnail-update', handler)
     return () => ipcRenderer.removeListener('tab:thumbnail-update', handler)
+  },
+
+  // Global shortcut events (from menu accelerators in main process)
+  onShortcut: (shortcut: string, callback: () => void) => {
+    const handler = (): void => {
+      callback()
+    }
+    ipcRenderer.on(`shortcut:${shortcut}`, handler)
+    return () => ipcRenderer.removeListener(`shortcut:${shortcut}`, handler)
   }
 }
 

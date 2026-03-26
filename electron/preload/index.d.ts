@@ -27,6 +27,7 @@ export interface AxleAPI {
     callback: (data: { tabId: string; isLoading: boolean }) => void
   ) => () => void
   onTabThumbnailUpdate: (callback: (data: { tabId: string; dataUrl: string }) => void) => () => void
+  onShortcut: (shortcut: string, callback: () => void) => () => void
 }
 
 declare global {

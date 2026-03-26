@@ -29,12 +29,25 @@ export class TabManager {
     this.chromeView = chromeView
   }
 
+  private closedTabStack: { url: string; title: string }[] = []
+
+  getActiveTabId(): string | null {
+    return this.activeTabId
+  }
+
   getSidebarWidth(): number {
     return this.sidebarCollapsed ? COLLAPSED_SIDEBAR_WIDTH : DEFAULT_SIDEBAR_WIDTH
   }
 
   setSidebarCollapsed(collapsed: boolean): void {
     this.sidebarCollapsed = collapsed
+  }
+
+  reopenClosedTab(): void {
+    const last = this.closedTabStack.pop()
+    if (last) {
+      this.createTab(last.url)
+    }
   }
 
   private getNewTabPath(): string {
@@ -193,7 +206,8 @@ export class TabManager {
 
     // Update bounds
     const bounds = this.window.getBounds()
-    this.updateTabBounds(this.getSidebarWidth(), bounds.width, bounds.height)
+    const sw = this.getSidebarWidth()
+    this.updateTabBounds(sw, bounds.width - sw, bounds.height)
 
     this.pushStateUpdate()
     this.pushNavigationUpdate(tab)
@@ -202,6 +216,9 @@ export class TabManager {
   closeTab(tabId: string): void {
     const tab = this.tabs.get(tabId)
     if (!tab) return
+
+    // Save for reopen
+    this.closedTabStack.push({ url: tab.state.url, title: tab.state.title })
 
     // If closing the active tab, switch to the most recently used tab
     if (this.activeTabId === tabId) {
@@ -296,11 +313,7 @@ export class TabManager {
     this.pushStateUpdate()
   }
 
-  updateTabBounds(sidebarWidth: number, windowWidth: number, windowHeight: number): void {
-    const contentX = sidebarWidth
-    const contentWidth = windowWidth - sidebarWidth
-    const contentHeight = windowHeight
-
+  updateTabBounds(contentX: number, contentWidth: number, contentHeight: number): void {
     if (this.splitTabIds.length === 2) {
       // Split view: side by side
       const halfWidth = Math.floor(contentWidth / 2)

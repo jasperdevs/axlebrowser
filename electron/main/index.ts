@@ -1,4 +1,4 @@
-import { app, BaseWindow, WebContentsView, Menu, ipcMain, session } from 'electron'
+import { app, BaseWindow, WebContentsView, Menu, session } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { TabManager } from './managers/TabManager'
@@ -17,10 +17,11 @@ function createWindow(): void {
     frame: false,
     backgroundColor: '#0a0a0a',
     titleBarStyle: 'hidden',
-    titleBarOverlay: false
+    titleBarOverlay: false,
+    icon: join(__dirname, '../../resources/axleXonly.svg')
   })
 
-  // Chrome UI view (sidebar, omnibox, overlays)
+  // Chrome UI view (sidebar on RIGHT side)
   chromeView = new WebContentsView({
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -47,6 +48,9 @@ function createWindow(): void {
 
   // Set up security
   setupSecurity()
+
+  // Set up global shortcuts via menu accelerators
+  setupGlobalShortcuts()
 
   // Layout the views
   updateLayout()
@@ -76,7 +80,7 @@ function updateLayout(): void {
   const bounds = mainWindow.getBounds()
   const sidebarWidth = tabManager.getSidebarWidth()
 
-  // Chrome view covers the sidebar area
+  // Sidebar on the LEFT side
   chromeView.setBounds({
     x: 0,
     y: 0,
@@ -84,17 +88,133 @@ function updateLayout(): void {
     height: bounds.height
   })
 
-  // Update tab view bounds
-  tabManager.updateTabBounds(sidebarWidth, bounds.width, bounds.height)
+  // Tab content fills everything to the RIGHT of the sidebar
+  tabManager.updateTabBounds(sidebarWidth, bounds.width - sidebarWidth, bounds.height)
+}
+
+// Expose for external use
+export function requestLayoutUpdate(): void {
+  updateLayout()
+}
+
+function setupGlobalShortcuts(): void {
+  if (!tabManager || !chromeView) return
+
+  const tm = tabManager
+  const cv = chromeView
+
+  const template: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    },
+    {
+      label: 'Browser',
+      submenu: [
+        {
+          label: 'New Tab',
+          accelerator: 'CmdOrCtrl+T',
+          click: () => tm.createTab()
+        },
+        {
+          label: 'Close Tab',
+          accelerator: 'CmdOrCtrl+W',
+          click: () => {
+            const activeId = tm.getActiveTabId()
+            if (activeId) tm.closeTab(activeId)
+          }
+        },
+        {
+          label: 'Reopen Closed Tab',
+          accelerator: 'CmdOrCtrl+Shift+T',
+          click: () => tm.reopenClosedTab()
+        },
+        { type: 'separator' },
+        {
+          label: 'Reload',
+          accelerator: 'CmdOrCtrl+R',
+          click: () => {
+            const activeId = tm.getActiveTabId()
+            if (activeId) tm.reload(activeId)
+          }
+        },
+        {
+          label: 'Back',
+          accelerator: 'Alt+Left',
+          click: () => {
+            const activeId = tm.getActiveTabId()
+            if (activeId) tm.goBack(activeId)
+          }
+        },
+        {
+          label: 'Forward',
+          accelerator: 'Alt+Right',
+          click: () => {
+            const activeId = tm.getActiveTabId()
+            if (activeId) tm.goForward(activeId)
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Omnibox',
+          accelerator: 'CmdOrCtrl+L',
+          click: () => cv.webContents.send('shortcut:omnibox')
+        },
+        {
+          label: 'Search',
+          accelerator: 'CmdOrCtrl+K',
+          click: () => cv.webContents.send('shortcut:omnibox')
+        },
+        {
+          label: 'Toggle Sidebar',
+          accelerator: 'CmdOrCtrl+B',
+          click: () => cv.webContents.send('shortcut:toggle-sidebar')
+        },
+        {
+          label: 'Command Palette',
+          accelerator: 'CmdOrCtrl+Shift+P',
+          click: () => cv.webContents.send('shortcut:command-palette')
+        },
+        { type: 'separator' },
+        {
+          label: 'Fullscreen',
+          accelerator: 'F11',
+          click: () => {
+            if (mainWindow) {
+              mainWindow.setFullScreen(!mainWindow.isFullScreen())
+            }
+          }
+        }
+      ]
+    },
+    {
+      label: 'Dev',
+      submenu: [
+        {
+          label: 'Chrome DevTools',
+          accelerator: 'CmdOrCtrl+Shift+I',
+          click: () => cv.webContents.openDevTools()
+        }
+      ]
+    }
+  ]
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 function setupSecurity(): void {
-  // Set permission handler -- default deny
   session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
     callback(false)
   })
 
-  // CSP for the chrome UI
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     if (details.url.startsWith('http://localhost:') || details.url.startsWith('file://')) {
       callback({
@@ -114,28 +234,6 @@ function setupSecurity(): void {
       callback({ responseHeaders: details.responseHeaders })
     }
   })
-
-  // Create hidden Edit menu for copy/paste on Windows
-  const template: Electron.MenuItemConstructorOptions[] = [
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' }
-      ]
-    }
-  ]
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
-}
-
-// Expose updateLayout so TabManager can call it
-export function requestLayoutUpdate(): void {
-  updateLayout()
 }
 
 app.whenReady().then(() => {
