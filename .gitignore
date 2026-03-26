@@ -1,8 +1,11 @@
 node_modules/
 dist/
+dist-node/
+dist-web/
 out/
 .env
 *.local
+*.tsbuildinfo
 .DS_Store
 Thumbs.db
 nul
