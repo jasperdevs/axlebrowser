@@ -67,7 +67,7 @@ function createWindow(): void {
   mainWindow.show()
 
   // Create the first tab
-  tabManager.createTab('https://www.google.com')
+  tabManager.createTab()
 }
 
 function updateLayout(): void {
