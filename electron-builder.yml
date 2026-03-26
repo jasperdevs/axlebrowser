@@ -1,0 +1,26 @@
+appId: com.axlebrowser.app
+productName: Axle
+directories:
+  buildResources: resources
+  output: dist
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron/*'
+  - '!shared/*'
+  - '!tests/*'
+  - '!{.eslintrc,.prettierrc,tsconfig*.json,electron.vite.config.ts}'
+asar: true
+asarUnpack:
+  - '**/better-sqlite3/**'
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.png
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: Axle
+  uninstallDisplayName: Axle
+  createDesktopShortcut: always
